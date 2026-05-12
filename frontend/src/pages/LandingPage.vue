@@ -36,7 +36,7 @@ const features = [
     {
         icon: Shield,
         title: 'Akurasi Tinggi',
-        description: 'Didukung model bahasa terdepan untuk deteksi yang andal dan konsisten.',
+        description: 'Menggunakan model bahasa terdepan untuk deteksi yang andal dan konsisten.',
         color: 'text-blue-500',
         bg: 'bg-blue-500/10',
         hoverBg: 'group-hover:bg-blue-500/20',
@@ -109,7 +109,7 @@ const examples = [
                 :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
                 <Badge variant="secondary" class="mb-6 gap-1.5 text-xs px-3 py-1">
                     <Sparkles class="w-3 h-3 text-yellow-500" />
-                    Didukung Claude AI · Gratis Selamanya
+                    Deteksi Teks AI · Gratis Selamanya
                 </Badge>
 
                 <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-5">
@@ -319,7 +319,7 @@ const examples = [
                     </div>
                     <span class="text-xs text-muted-foreground font-medium">AuthentiText AI</span>
                 </div>
-                <span class="text-xs text-muted-foreground">Didukung Claude · © 2025</span>
+                <span class="text-xs text-muted-foreground">© 2026 AuthentiText</span>
             </div>
         </footer>
 
