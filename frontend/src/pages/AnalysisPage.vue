@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Bot, ArrowLeft, Trash2, Loader2, FileText, AlertCircle, Sparkles } from 'lucide-vue-next'
+import { Bot, ArrowLeft, Trash2, Loader2, FileText, AlertCircle, Wand2 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAnalysisStore } from '@/stores/useAnalysisStore'
@@ -135,7 +135,7 @@ function handleClear() {
             <Button class="w-full gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]" size="lg"
                 :disabled="!isValid || store.loading" @click="handleAnalyze">
                 <Loader2 v-if="store.loading" class="w-4 h-4 animate-spin" />
-                <Sparkles v-else class="w-4 h-4" />
+                <Wand2 v-else class="w-4 h-4" />
                 {{ store.loading ? 'Sedang menganalisis...' : 'Analisis Teks' }}
             </Button>
 
