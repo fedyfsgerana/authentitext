@@ -6,12 +6,10 @@ import { useToast } from "@/composables/useToast";
 export const useAnalysisStore = defineStore("analysis", () => {
   const result = ref(null);
   const loading = ref(false);
-  const error = ref(null);
   const { toast } = useToast();
 
   async function analyze(text) {
     loading.value = true;
-    error.value = null;
     result.value = null;
 
     try {
@@ -25,11 +23,12 @@ export const useAnalysisStore = defineStore("analysis", () => {
       });
       return data;
     } catch (err) {
-      error.value = err.message || "Analisis gagal";
+      const message = err.message || "Analisis gagal, coba lagi";
       toast({
         title: "Analisis Gagal",
-        description: error.value,
+        description: message,
         type: "error",
+        duration: 5000,
       });
       throw err;
     } finally {
@@ -54,8 +53,7 @@ export const useAnalysisStore = defineStore("analysis", () => {
 
   function clearResult() {
     result.value = null;
-    error.value = null;
   }
 
-  return { result, loading, error, analyze, clearResult };
+  return { result, loading, analyze, clearResult };
 });

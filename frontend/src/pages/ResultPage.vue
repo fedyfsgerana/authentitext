@@ -1,7 +1,11 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Bot, User, ArrowLeft, RotateCcw, Clock, CheckCircle, AlertCircle, Minus, Download, FileJson } from 'lucide-vue-next'
+import {
+    Bot, User, ArrowLeft, RotateCcw, Clock,
+    CheckCircle, AlertCircle, Minus, Download,
+    FileJson, Share2, ChevronDown, ChevronUp
+} from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,19 +21,22 @@ const { exportPDF, exportJSON } = useExport()
 const { toast } = useToast()
 
 const result = computed(() => store.result)
+const showFullText = ref(false)
+const isVisible = ref(false)
 
 onMounted(() => {
-    if (!result.value) router.push('/analyze')
+    if (!result.value) { router.push('/analyze'); return }
+    setTimeout(() => isVisible.value = true, 100)
 })
 
 const verdictConfig = computed(() => {
     if (!result.value) return {}
     const ai = result.value.ai_probability
-    if (ai >= 80) return { label: 'Dibuat AI', variant: 'destructive', icon: Bot, color: 'text-destructive', bg: 'bg-destructive/10' }
-    if (ai >= 60) return { label: 'Kemungkinan AI', variant: 'destructive', icon: Bot, color: 'text-destructive', bg: 'bg-destructive/10' }
-    if (ai >= 40) return { label: 'Tidak Pasti', variant: 'secondary', icon: Minus, color: 'text-muted-foreground', bg: 'bg-muted' }
-    if (ai >= 20) return { label: 'Kemungkinan Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10' }
-    return { label: 'Ditulis Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10' }
+    if (ai >= 80) return { label: 'Dibuat AI', variant: 'destructive', icon: Bot, color: 'text-destructive', bg: 'bg-destructive/10', border: 'border-destructive/30', glow: 'shadow-destructive/20' }
+    if (ai >= 60) return { label: 'Kemungkinan AI', variant: 'destructive', icon: Bot, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', glow: 'shadow-orange-500/20' }
+    if (ai >= 40) return { label: 'Tidak Pasti', variant: 'secondary', icon: Minus, color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border', glow: '' }
+    if (ai >= 20) return { label: 'Kemungkinan Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30', glow: 'shadow-green-500/20' }
+    return { label: 'Ditulis Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30', glow: 'shadow-green-500/20' }
 })
 
 const confidenceIcon = computed(() => {
@@ -49,6 +56,17 @@ function handleExportJSON() {
     toast({ title: 'JSON Diunduh', description: 'Data berhasil diekspor', type: 'success' })
 }
 
+async function handleShare() {
+    try {
+        await navigator.clipboard.writeText(
+            `AuthentiText AI Result:\nAI: ${result.value.ai_probability}% | Manusia: ${result.value.human_probability}%\nVerdict: ${result.value.verdict}\n${result.value.summary}`
+        )
+        toast({ title: 'Disalin!', description: 'Hasil analisis disalin ke clipboard', type: 'success' })
+    } catch (e) {
+        toast({ title: 'Gagal menyalin', type: 'error' })
+    }
+}
+
 function formatDate(iso) {
     return new Date(iso).toLocaleString('id-ID', {
         day: 'numeric', month: 'long', year: 'numeric',
@@ -61,14 +79,14 @@ function formatDate(iso) {
     <div class="min-h-screen bg-background">
 
         <!-- Navbar -->
-        <nav class="border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-sm">
+        <nav class="border-b border-border/50 sticky top-0 z-50 glass">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-                <div class="flex items-center gap-2 cursor-pointer" @click="router.push('/')">
+                <div class="flex items-center gap-2.5 cursor-pointer group" @click="router.push('/')">
                     <div
-                        class="w-6 h-6 rounded-md bg-primary flex items-center justify-center transition-transform hover:scale-110">
+                        class="w-6 h-6 rounded-lg bg-primary flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
                         <Bot class="w-3.5 h-3.5 text-primary-foreground" />
                     </div>
-                    <span class="font-semibold text-sm">AuthentiText</span>
+                    <span class="font-bold text-sm">AuthentiText</span>
                 </div>
                 <div class="flex items-center gap-1 sm:gap-2">
                     <DarkModeToggle />
@@ -79,146 +97,209 @@ function formatDate(iso) {
             </div>
         </nav>
 
-        <main v-if="result" class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main v-if="result" class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 transition-all duration-500"
+            :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
 
             <!-- Tombol Kembali -->
             <button
-                class="group flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-200 mb-6"
+                class="group flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-200 mb-8"
                 @click="router.push('/analyze')">
-                <ArrowLeft class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
                 Analisis Baru
             </button>
 
-            <!-- Header -->
-            <div class="text-center mb-8 sm:mb-10">
-                <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-4 transition-transform hover:scale-105"
-                    :class="verdictConfig.bg">
-                    <component :is="verdictConfig.icon" class="w-8 h-8 sm:w-9 sm:h-9" :class="verdictConfig.color" />
-                </div>
-                <div class="mb-3">
-                    <Badge :variant="verdictConfig.variant" class="text-sm px-4 py-1">
-                        {{ verdictConfig.label }}
-                    </Badge>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Analisis Selesai</h1>
-                <div class="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                    <Clock class="w-3 h-3" />
-                    {{ formatDate(result.analyzedAt) }}
+            <!-- Verdict Hero Card -->
+            <div class="relative rounded-3xl border p-6 sm:p-8 mb-6 overflow-hidden transition-all duration-300 hover:shadow-xl"
+                :class="[verdictConfig.border, `hover:${verdictConfig.glow}`]">
+                <!-- Background -->
+                <div class="absolute inset-0 opacity-30 pointer-events-none"
+                    :class="result.ai_probability >= 50 ? 'gradient-ai' : 'gradient-human'" />
+                <div
+                    class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-current to-transparent opacity-20" />
+
+                <div class="relative flex flex-col sm:flex-row items-center gap-6">
+                    <!-- Icon -->
+                    <div class="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 border transition-transform duration-300 hover:scale-105 shadow-lg"
+                        :class="[verdictConfig.bg, verdictConfig.border, `shadow-${verdictConfig.glow}`]">
+                        <component :is="verdictConfig.icon" class="w-10 h-10" :class="verdictConfig.color" />
+                    </div>
+
+                    <!-- Info -->
+                    <div class="text-center sm:text-left flex-1">
+                        <Badge :variant="verdictConfig.variant" class="mb-2 text-xs px-3">
+                            {{ verdictConfig.label }}
+                        </Badge>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1">
+                            Analisis Selesai
+                        </h1>
+                        <div
+                            class="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-muted-foreground">
+                            <Clock class="w-3 h-3" />
+                            {{ formatDate(result.analyzedAt) }}
+                        </div>
+                    </div>
+
+                    <!-- Quick stats -->
+                    <div class="flex sm:flex-col gap-3 sm:gap-2 shrink-0">
+                        <div class="text-center px-4 py-2 rounded-xl bg-background/60 border border-border/50">
+                            <div class="text-2xl font-black tabular-nums text-destructive">{{ result.ai_probability }}%
+                            </div>
+                            <div class="text-xs text-muted-foreground">AI</div>
+                        </div>
+                        <div class="text-center px-4 py-2 rounded-xl bg-background/60 border border-border/50">
+                            <div class="text-2xl font-black tabular-nums text-green-500">{{ result.human_probability }}%
+                            </div>
+                            <div class="text-xs text-muted-foreground">Manusia</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Chart + Skor -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <!-- Chart + Detail -->
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-5">
 
                 <!-- Donut Chart -->
-                <Card class="border-border card-hover sm:col-span-1">
-                    <CardContent class="p-5 flex items-center justify-center">
+                <Card class="sm:col-span-2 border-border card-interactive">
+                    <CardContent class="p-6 flex items-center justify-center">
                         <ScoreChart :ai-score="result.ai_probability" :human-score="result.human_probability" />
                     </CardContent>
                 </Card>
 
-                <!-- Skor Detail -->
-                <div class="sm:col-span-2 grid grid-cols-1 gap-3">
-                    <Card class="border-border card-hover-destructive group">
+                <!-- Score bars + confidence -->
+                <div class="sm:col-span-3 flex flex-col gap-3">
+                    <Card class="border-border card-interactive-ai flex-1">
                         <CardContent class="p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center gap-2">
-                                    <Bot class="w-4 h-4 text-destructive" />
-                                    <span class="text-sm font-medium text-destructive">AI</span>
+                                    <div class="w-7 h-7 rounded-lg bg-destructive/10 flex items-center justify-center">
+                                        <Bot class="w-3.5 h-3.5 text-destructive" />
+                                    </div>
+                                    <span class="text-sm font-semibold">Probabilitas AI</span>
                                 </div>
-                                <span class="text-2xl font-bold tabular-nums">{{ result.ai_probability }}%</span>
+                                <span class="text-3xl font-black tabular-nums text-destructive">{{ result.ai_probability
+                                    }}%</span>
                             </div>
-                            <div class="h-2.5 bg-muted rounded-full overflow-hidden">
-                                <div class="h-full bg-destructive rounded-full transition-all duration-700"
+                            <div class="h-3 bg-muted rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-destructive/80 to-destructive"
                                     :style="{ width: result.ai_probability + '%' }" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card class="border-border card-hover-green group">
+                    <Card class="border-border card-interactive-human flex-1">
                         <CardContent class="p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center gap-2">
-                                    <User class="w-4 h-4 text-green-500" />
-                                    <span class="text-sm font-medium text-green-500">Manusia</span>
+                                    <div class="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                        <User class="w-3.5 h-3.5 text-green-500" />
+                                    </div>
+                                    <span class="text-sm font-semibold">Probabilitas Manusia</span>
                                 </div>
-                                <span class="text-2xl font-bold tabular-nums">{{ result.human_probability }}%</span>
+                                <span class="text-3xl font-black tabular-nums text-green-500">{{
+                                    result.human_probability }}%</span>
                             </div>
-                            <div class="h-2.5 bg-muted rounded-full overflow-hidden">
-                                <div class="h-full bg-green-500 rounded-full transition-all duration-700"
+                            <div class="h-3 bg-muted rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-green-500/80 to-green-500"
                                     :style="{ width: result.human_probability + '%' }" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border card-interactive">
+                        <CardContent class="p-4 sm:p-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <component :is="confidenceIcon" class="w-3.5 h-3.5 text-primary" />
+                                    </div>
+                                    <span class="text-sm font-semibold">Tingkat Kepercayaan</span>
+                                </div>
+                                <Badge variant="outline" class="font-semibold">{{ result.confidence }}</Badge>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </div>
 
-            <!-- Kepercayaan -->
-            <Card class="mb-5 sm:mb-6 border-border card-hover group">
-                <CardContent class="p-4 sm:p-5">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <component :is="confidenceIcon"
-                                class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <span class="text-sm font-medium">Tingkat Kepercayaan</span>
-                        </div>
-                        <Badge variant="outline" class="text-xs">{{ result.confidence }}</Badge>
-                    </div>
-                </CardContent>
-            </Card>
-
             <!-- Ringkasan -->
-            <Card class="mb-5 sm:mb-6 border-border card-hover-primary">
-                <CardHeader class="pb-3 px-4 sm:px-6">
-                    <CardTitle class="text-sm font-medium">Ringkasan Analisis</CardTitle>
+            <Card class="mb-4 border-border card-interactive-primary">
+                <CardHeader class="pb-2 px-5 pt-5">
+                    <CardTitle class="text-sm font-bold flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
+                            <FileJson class="w-3 h-3 text-primary" />
+                        </div>
+                        Ringkasan Analisis
+                    </CardTitle>
                 </CardHeader>
-                <CardContent class="pt-0 px-4 sm:px-6">
+                <CardContent class="px-5 pb-5">
                     <p class="text-sm text-muted-foreground leading-relaxed">{{ result.summary }}</p>
                 </CardContent>
             </Card>
 
-            <!-- Indikator Utama -->
-            <Card v-if="result.highlights && result.highlights.length" class="mb-6 sm:mb-8 border-border">
-                <CardHeader class="pb-3 px-4 sm:px-6">
-                    <CardTitle class="text-sm font-medium">Indikator Utama</CardTitle>
+            <!-- Indikator -->
+            <Card v-if="result.highlights?.length" class="mb-4 border-border">
+                <CardHeader class="pb-2 px-5 pt-5">
+                    <CardTitle class="text-sm font-bold flex items-center gap-2">
+                        <div class="w-5 h-5 rounded bg-yellow-500/10 flex items-center justify-center">
+                            <AlertCircle class="w-3 h-3 text-yellow-500" />
+                        </div>
+                        Indikator Utama
+                    </CardTitle>
                 </CardHeader>
-                <CardContent class="pt-0 px-4 sm:px-6 space-y-3">
+                <CardContent class="px-5 pb-5 space-y-2.5">
                     <div v-for="(h, i) in result.highlights" :key="i"
-                        class="p-3 rounded-md bg-muted/40 border border-border transition-all duration-200 hover:bg-muted/70 hover:border-border/60">
-                        <p class="text-xs font-medium mb-1 italic">"{{ h.text }}"</p>
-                        <p class="text-xs text-muted-foreground">{{ h.reason }}</p>
+                        class="group p-3.5 rounded-xl bg-muted/40 border border-border/50 transition-all duration-200 hover:bg-muted/70 hover:border-border hover:shadow-sm">
+                        <p class="text-xs font-semibold mb-1.5 italic text-foreground/80">"{{ h.text }}"</p>
+                        <p class="text-xs text-muted-foreground leading-relaxed">{{ h.reason }}</p>
                     </div>
                 </CardContent>
             </Card>
 
-            <!-- Teks Asli -->
-            <Card class="mb-6 sm:mb-8 border-border card-hover">
-                <CardHeader class="pb-3 px-4 sm:px-6">
-                    <CardTitle class="text-sm font-medium">Teks yang Dianalisis</CardTitle>
+            <!-- Teks Asli (collapsible) -->
+            <Card class="mb-6 border-border card-interactive">
+                <CardHeader class="pb-2 px-5 pt-5 cursor-pointer" @click="showFullText = !showFullText">
+                    <CardTitle class="text-sm font-bold flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded bg-muted flex items-center justify-center">
+                                <FileJson class="w-3 h-3 text-muted-foreground" />
+                            </div>
+                            Teks yang Dianalisis
+                        </div>
+                        <component :is="showFullText ? ChevronUp : ChevronDown" class="w-4 h-4 text-muted-foreground" />
+                    </CardTitle>
                 </CardHeader>
-                <CardContent class="pt-0 px-4 sm:px-6">
-                    <p class="text-sm text-muted-foreground leading-relaxed line-clamp-6">{{ result.text }}</p>
+                <CardContent class="px-5 pb-5">
+                    <p class="text-sm text-muted-foreground leading-relaxed transition-all duration-300"
+                        :class="showFullText ? '' : 'line-clamp-3'">
+                        {{ result.text }}
+                    </p>
+                    <button v-if="result.text.length > 200"
+                        class="text-xs text-primary hover:underline mt-2 transition-colors"
+                        @click="showFullText = !showFullText">
+                        {{ showFullText ? 'Tampilkan lebih sedikit' : 'Tampilkan semua' }}
+                    </button>
                 </CardContent>
             </Card>
 
             <!-- Aksi -->
-            <div class="flex flex-col sm:flex-row gap-3">
-                <Button class="flex-1 gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Button
+                    class="col-span-2 gap-2 h-11 font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-primary/10"
                     @click="router.push('/analyze')">
                     <RotateCcw class="w-4 h-4" />
                     Analisis Lagi
                 </Button>
                 <Button variant="outline"
-                    class="flex-1 gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-                    @click="handleExportPDF">
-                    <Download class="w-4 h-4" />
-                    Unduh PDF
+                    class="gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                    @click="handleShare">
+                    <Share2 class="w-4 h-4" />
+                    <span class="hidden sm:inline">Bagikan</span>
                 </Button>
                 <Button variant="outline"
-                    class="flex-1 gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-                    @click="handleExportJSON">
-                    <FileJson class="w-4 h-4" />
-                    Ekspor JSON
+                    class="gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                    @click="handleExportPDF">
+                    <Download class="w-4 h-4" />
+                    <span class="hidden sm:inline">PDF</span>
                 </Button>
             </div>
 

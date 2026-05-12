@@ -23,7 +23,7 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -52,19 +52,58 @@
 @layer base {
   * { @apply border-border; }
   body { @apply bg-background text-foreground; }
+  html { scroll-behavior: smooth; }
 }
 
 @layer utilities {
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer;
+  .glass {
+    @apply bg-background/60 backdrop-blur-xl border border-border/50;
   }
-  .card-hover-destructive {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-destructive/40 hover:bg-destructive/5 cursor-pointer;
+  .card-interactive {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer border border-border;
   }
-  .card-hover-green {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-green-500/40 hover:bg-green-500/5 cursor-pointer;
+  .card-interactive-ai {
+    @apply card-interactive hover:border-destructive/50 hover:shadow-destructive/10;
   }
-  .card-hover-primary {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 cursor-pointer;
+  .card-interactive-human {
+    @apply card-interactive hover:border-green-500/50 hover:shadow-green-500/10;
   }
+  .card-interactive-primary {
+    @apply card-interactive hover:border-primary/40 hover:shadow-primary/5;
+  }
+  .gradient-ai {
+    background: linear-gradient(135deg, hsl(var(--destructive) / 0.15), hsl(var(--destructive) / 0.05));
+  }
+  .gradient-human {
+    background: linear-gradient(135deg, rgb(34 197 94 / 0.15), rgb(34 197 94 / 0.05));
+  }
+  .gradient-hero {
+    background: radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--primary) / 0.08), transparent);
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }

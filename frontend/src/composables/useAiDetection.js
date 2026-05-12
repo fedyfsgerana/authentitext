@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 
-const client = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+const client = new Groq({
+  apiKey: import.meta.env.VITE_GROQ_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
@@ -21,7 +21,7 @@ Teks yang akan dianalisis:
 ${text}
 """
 
-Jawab HANYA dengan objek JSON yang valid dalam format berikut, tanpa teks tambahan:
+Jawab HANYA dengan objek JSON yang valid dalam format berikut, tanpa teks tambahan apapun, tanpa markdown, tanpa backtick:
 {
   "ai_probability": <angka 0-100>,
   "human_probability": <angka 0-100>,
@@ -35,13 +35,19 @@ Jawab HANYA dengan objek JSON yang valid dalam format berikut, tanpa teks tambah
 
 Pastikan ai_probability + human_probability = 100.`;
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+  const completion = await client.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
     max_tokens: 1024,
-    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
   });
 
-  const raw = message.content[0].text;
+  const raw = completion.choices[0].message.content;
   const clean = raw.replace(/```json|```/g, "").trim();
   const parsed = JSON.parse(clean);
 
