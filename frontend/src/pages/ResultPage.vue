@@ -1,15 +1,21 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Bot, User, ArrowLeft, RotateCcw, Clock, CheckCircle, AlertCircle, Minus } from 'lucide-vue-next'
+import { Bot, User, ArrowLeft, RotateCcw, Clock, CheckCircle, AlertCircle, Minus, Download, FileJson } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAnalysisStore } from '@/stores/useAnalysisStore'
+import { useExport } from '@/composables/useExport'
+import { useToast } from '@/composables/useToast'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
+import ScoreChart from '@/components/ScoreChart.vue'
 
 const router = useRouter()
 const store = useAnalysisStore()
+const { exportPDF, exportJSON } = useExport()
+const { toast } = useToast()
+
 const result = computed(() => store.result)
 
 onMounted(() => {
@@ -32,6 +38,16 @@ const confidenceIcon = computed(() => {
     if (result.value.confidence === 'Sedang') return Minus
     return AlertCircle
 })
+
+function handleExportPDF() {
+    exportPDF(result.value)
+    toast({ title: 'PDF Diunduh', description: 'Laporan berhasil disimpan', type: 'success' })
+}
+
+function handleExportJSON() {
+    exportJSON(result.value)
+    toast({ title: 'JSON Diunduh', description: 'Data berhasil diekspor', type: 'success' })
+}
 
 function formatDate(iso) {
     return new Date(iso).toLocaleString('id-ID', {
@@ -73,7 +89,7 @@ function formatDate(iso) {
                 Analisis Baru
             </button>
 
-            <!-- Header Hasil -->
+            <!-- Header -->
             <div class="text-center mb-8 sm:mb-10">
                 <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-4 transition-transform hover:scale-105"
                     :class="verdictConfig.bg">
@@ -91,39 +107,50 @@ function formatDate(iso) {
                 </div>
             </div>
 
-            <!-- Kartu Skor -->
-            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
-                <Card class="border-border card-hover-destructive group">
-                    <CardContent class="p-4 sm:p-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <Bot class="w-4 h-4 text-destructive" />
-                            <span class="text-sm font-medium text-destructive">AI</span>
-                        </div>
-                        <div class="text-3xl sm:text-4xl font-bold mb-3 tabular-nums">
-                            {{ result.ai_probability }}%
-                        </div>
-                        <div class="h-2 bg-muted rounded-full overflow-hidden">
-                            <div class="h-full bg-destructive rounded-full transition-all duration-700"
-                                :style="{ width: result.ai_probability + '%' }" />
-                        </div>
+            <!-- Chart + Skor -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+
+                <!-- Donut Chart -->
+                <Card class="border-border card-hover sm:col-span-1">
+                    <CardContent class="p-5 flex items-center justify-center">
+                        <ScoreChart :ai-score="result.ai_probability" :human-score="result.human_probability" />
                     </CardContent>
                 </Card>
 
-                <Card class="border-border card-hover-green group">
-                    <CardContent class="p-4 sm:p-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <User class="w-4 h-4 text-green-500" />
-                            <span class="text-sm font-medium text-green-500">Manusia</span>
-                        </div>
-                        <div class="text-3xl sm:text-4xl font-bold mb-3 tabular-nums">
-                            {{ result.human_probability }}%
-                        </div>
-                        <div class="h-2 bg-muted rounded-full overflow-hidden">
-                            <div class="h-full bg-green-500 rounded-full transition-all duration-700"
-                                :style="{ width: result.human_probability + '%' }" />
-                        </div>
-                    </CardContent>
-                </Card>
+                <!-- Skor Detail -->
+                <div class="sm:col-span-2 grid grid-cols-1 gap-3">
+                    <Card class="border-border card-hover-destructive group">
+                        <CardContent class="p-4 sm:p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <Bot class="w-4 h-4 text-destructive" />
+                                    <span class="text-sm font-medium text-destructive">AI</span>
+                                </div>
+                                <span class="text-2xl font-bold tabular-nums">{{ result.ai_probability }}%</span>
+                            </div>
+                            <div class="h-2.5 bg-muted rounded-full overflow-hidden">
+                                <div class="h-full bg-destructive rounded-full transition-all duration-700"
+                                    :style="{ width: result.ai_probability + '%' }" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border card-hover-green group">
+                        <CardContent class="p-4 sm:p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <User class="w-4 h-4 text-green-500" />
+                                    <span class="text-sm font-medium text-green-500">Manusia</span>
+                                </div>
+                                <span class="text-2xl font-bold tabular-nums">{{ result.human_probability }}%</span>
+                            </div>
+                            <div class="h-2.5 bg-muted rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full transition-all duration-700"
+                                    :style="{ width: result.human_probability + '%' }" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             <!-- Kepercayaan -->
@@ -157,8 +184,8 @@ function formatDate(iso) {
                 </CardHeader>
                 <CardContent class="pt-0 px-4 sm:px-6 space-y-3">
                     <div v-for="(h, i) in result.highlights" :key="i"
-                        class="p-3 rounded-md bg-muted/40 border border-border transition-all duration-200 hover:bg-muted/70 hover:border-border/60 cursor-default">
-                        <p class="text-xs font-medium mb-1 italic text-foreground">"{{ h.text }}"</p>
+                        class="p-3 rounded-md bg-muted/40 border border-border transition-all duration-200 hover:bg-muted/70 hover:border-border/60">
+                        <p class="text-xs font-medium mb-1 italic">"{{ h.text }}"</p>
                         <p class="text-xs text-muted-foreground">{{ h.reason }}</p>
                     </div>
                 </CardContent>
@@ -182,9 +209,16 @@ function formatDate(iso) {
                     Analisis Lagi
                 </Button>
                 <Button variant="outline"
-                    class="flex-1 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-                    @click="router.push('/history')">
-                    Lihat Riwayat
+                    class="flex-1 gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                    @click="handleExportPDF">
+                    <Download class="w-4 h-4" />
+                    Unduh PDF
+                </Button>
+                <Button variant="outline"
+                    class="flex-1 gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                    @click="handleExportJSON">
+                    <FileJson class="w-4 h-4" />
+                    Ekspor JSON
                 </Button>
             </div>
 
