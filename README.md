@@ -108,8 +108,8 @@ http://localhost:5173
 
 ## Developer
 
-**Fedy Fs.**  
-Gerana Web Developer
+**Fedy Fs. Gerana**  
+Web Developer
 
 ---
 
