@@ -1,8 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background rounded square -->
   <rect width="32" height="32" rx="8" fill="#0f0f0f"/>
-  <circle cx="16" cy="16" r="9" stroke="#ffffff" stroke-width="1.5" fill="none" opacity="0.15"/>
-  <path d="M10 16 C10 12.5 12.5 10 16 10 C19.5 10 22 12.5 22 16" stroke="#ef4444" stroke-width="2" stroke-linecap="round" fill="none"/>
-  <path d="M10 16 C10 19.5 12.5 22 16 22 C19.5 22 22 19.5 22 16" stroke="#22c55e" stroke-width="2" stroke-linecap="round" fill="none"/>
-  <circle cx="16" cy="16" r="2.5" fill="#ffffff"/>
-  <line x1="16" y1="10" x2="16" y2="22" stroke="#ffffff" stroke-width="1" opacity="0.3"/>
+
+  <!-- Bot icon (sama persis seperti lucide Bot) -->
+  <!-- Kepala robot -->
+  <rect x="9" y="12" width="14" height="11" rx="2" stroke="#ffffff" stroke-width="1.5" fill="none"/>
+  <!-- Antena -->
+  <path d="M16 12V9" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="16" cy="8.5" r="1" fill="#ffffff"/>
+  <!-- Mata kiri -->
+  <circle cx="13" cy="16.5" r="1.2" fill="#ffffff"/>
+  <!-- Mata kanan -->
+  <circle cx="19" cy="16.5" r="1.2" fill="#ffffff"/>
+  <!-- Mulut -->
+  <path d="M13 19.5h6" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Telinga kiri -->
+  <path d="M9 15.5H7.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Telinga kanan -->
+  <path d="M23 15.5H24.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

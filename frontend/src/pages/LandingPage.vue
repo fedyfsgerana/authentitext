@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
     ArrowRight, Zap, Shield, Clock, Bot, User,
-    ChevronRight, Sparkles, TrendingUp, BarChart3
+    ChevronRight, Sparkles, TrendingUp, BarChart3, History
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -27,7 +27,7 @@ const features = [
     {
         icon: Zap,
         title: 'Analisis Instan',
-        description: 'Dapatkan hasil dalam hitungan detik dengan mesin deteksi bertenaga Claude AI.',
+        description: 'Dapatkan hasil dalam hitungan detik dengan mesin deteksi canggih berbasis kecerdasan buatan.',
         color: 'text-yellow-500',
         bg: 'bg-yellow-500/10',
         hoverBg: 'group-hover:bg-yellow-500/20',
@@ -83,8 +83,9 @@ const examples = [
                 </div>
                 <div class="flex items-center gap-1 sm:gap-2">
                     <DarkModeToggle />
-                    <Button variant="ghost" size="sm" class="text-xs sm:text-sm hidden sm:flex"
+                    <Button variant="ghost" size="sm" class="text-xs sm:text-sm gap-1.5 hidden sm:flex"
                         @click="router.push('/history')">
+                        <History class="w-3.5 h-3.5" />
                         Riwayat
                     </Button>
                     <Button size="sm" class="text-xs sm:text-sm gap-1.5 transition-all duration-200 hover:gap-2.5"
@@ -148,8 +149,9 @@ const examples = [
                         <ArrowRight class="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="lg"
-                        class="w-full sm:w-auto h-12 text-base transition-all duration-200 hover:scale-105 active:scale-95"
+                        class="w-full sm:w-auto h-12 text-base transition-all duration-200 hover:scale-105 active:scale-95 gap-2"
                         @click="router.push('/history')">
+                        <History class="w-4 h-4" />
                         Lihat Riwayat
                     </Button>
                 </div>
@@ -234,7 +236,7 @@ const examples = [
                         <!-- Footer -->
                         <div class="flex items-center justify-between pt-3 border-t border-border/50">
                             <span class="text-xs text-muted-foreground">Kepercayaan: <strong>{{ example.confidence
-                                    }}</strong></span>
+                            }}</strong></span>
                             <span
                                 class="text-xs text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-1">
                                 Coba sendiri
@@ -299,13 +301,21 @@ const examples = [
                     <p class="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto">
                         Tanpa daftar. Tanpa kartu kredit. Hasil instan.
                     </p>
-                    <Button size="lg"
-                        class="w-full sm:w-auto gap-2 px-10 h-12 text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20"
-                        @click="router.push('/analyze')">
-                        <Sparkles class="w-4 h-4" />
-                        Analisis Sekarang
-                        <ArrowRight class="w-4 h-4" />
-                    </Button>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <Button size="lg"
+                            class="w-full sm:w-auto gap-2 px-10 h-12 text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20"
+                            @click="router.push('/analyze')">
+                            <Sparkles class="w-4 h-4" />
+                            Analisis Sekarang
+                            <ArrowRight class="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="lg"
+                            class="w-full sm:w-auto h-12 text-base gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
+                            @click="router.push('/history')">
+                            <History class="w-4 h-4" />
+                            Lihat Riwayat
+                        </Button>
+                    </div>
                 </div>
             </div>
         </section>

@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
     Bot, ArrowLeft, Trash2, Loader2, AlertCircle,
-    Wand2, ClipboardPaste, FileText, CheckCircle2
+    Wand2, ClipboardPaste, FileText, CheckCircle2, History
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -84,7 +84,9 @@ const tips = [
                 </div>
                 <div class="flex items-center gap-1 sm:gap-2">
                     <DarkModeToggle />
-                    <Button variant="ghost" size="sm" class="text-xs sm:text-sm" @click="router.push('/history')">
+                    <Button variant="ghost" size="sm" class="text-xs sm:text-sm gap-1.5 hidden sm:flex"
+                        @click="router.push('/history')">
+                        <History class="w-3.5 h-3.5" />
                         Riwayat
                     </Button>
                 </div>
