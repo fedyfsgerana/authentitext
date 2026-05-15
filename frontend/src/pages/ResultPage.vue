@@ -3,14 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
     Bot, User, ArrowLeft, RotateCcw, Clock,
-    CheckCircle, AlertCircle, Minus, Download,
-    FileJson, FileText, Share2, ChevronDown, ChevronUp
+    CheckCircle, AlertCircle, Minus,
+    FileJson, FileText, Share2, ChevronDown, ChevronUp, History
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAnalysisStore } from '@/stores/useAnalysisStore'
-import { useExport } from '@/composables/useExport'
 import { useToast } from '@/composables/useToast'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import ScoreChart from '@/components/ScoreChart.vue'
@@ -18,7 +17,6 @@ import TextHighlighter from '@/components/TextHighlighter.vue'
 
 const router = useRouter()
 const store = useAnalysisStore()
-const { exportPDF, exportJSON } = useExport()
 const { toast } = useToast()
 
 const result = computed(() => store.result)
@@ -46,11 +44,6 @@ const confidenceIcon = computed(() => {
     if (result.value.confidence === 'Sedang') return Minus
     return AlertCircle
 })
-
-function handleExportPDF() {
-    exportPDF(result.value)
-    toast({ title: 'PDF Diunduh', description: 'Laporan berhasil disimpan', type: 'success' })
-}
 
 async function handleShare() {
     try {
@@ -97,12 +90,23 @@ function formatDate(iso) {
             :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
 
             <!-- Tombol Kembali -->
-            <button
-                class="group flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-200 mb-8"
-                @click="router.push('/analyze')">
-                <ArrowLeft class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
-                Analisis Baru
-            </button>
+            <div class="flex items-center justify-between mb-8">
+                <button
+                    class="group flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 px-3 py-2 rounded-xl hover:bg-muted/60 border border-transparent hover:border-border/50 -ml-3"
+                    @click="router.push('/analyze')">
+                    <div
+                        class="w-6 h-6 rounded-lg bg-muted group-hover:bg-background border border-border/50 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                        <ArrowLeft class="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+                    </div>
+                    <span>Analisis Baru</span>
+                </button>
+
+                <div
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 border border-border/50 px-3 py-1.5 rounded-full">
+                    <Clock class="w-3 h-3" />
+                    {{ formatDate(result.analyzedAt) }}
+                </div>
+            </div>
 
             <!-- Verdict Hero Card -->
             <div class="relative rounded-3xl border p-6 sm:p-8 mb-6 overflow-hidden transition-all duration-300 hover:shadow-xl"
@@ -300,24 +304,24 @@ function formatDate(iso) {
             </Card>
 
             <!-- Aksi -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="flex flex-col sm:flex-row gap-3">
                 <Button
-                    class="col-span-2 gap-2 h-11 font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-primary/10"
+                    class="flex-1 gap-2 h-11 font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-primary/10 rounded-xl"
                     @click="router.push('/analyze')">
                     <RotateCcw class="w-4 h-4" />
                     Analisis Lagi
                 </Button>
                 <Button variant="outline"
-                    class="gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                    class="flex-1 gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] rounded-xl"
                     @click="handleShare">
                     <Share2 class="w-4 h-4" />
-                    <span class="hidden sm:inline">Bagikan</span>
+                    Salin Hasil
                 </Button>
                 <Button variant="outline"
-                    class="gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-                    @click="handleExportPDF">
-                    <Download class="w-4 h-4" />
-                    <span class="hidden sm:inline">PDF</span>
+                    class="flex-1 gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] rounded-xl"
+                    @click="router.push('/history')">
+                    <History class="w-4 h-4" />
+                    Riwayat
                 </Button>
             </div>
 

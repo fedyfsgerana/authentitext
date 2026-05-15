@@ -6,7 +6,7 @@ const { toasts, removeToast } = useToast()
 </script>
 
 <template>
-    <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-80">
+    <div class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-80">
         <TransitionGroup name="toast">
             <div v-for="toast in toasts" :key="toast.id"
                 class="flex items-start gap-3 p-4 rounded-lg border shadow-lg bg-background" :class="{
@@ -29,18 +29,21 @@ const { toasts, removeToast } = useToast()
 </template>
 
 <style scoped>
-.toast-enter-active,
+.toast-enter-active {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .toast-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-in;
 }
 
 .toast-enter-from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(-16px) scale(0.95);
 }
 
 .toast-leave-to {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(100%) scale(0.95);
 }
 </style>
