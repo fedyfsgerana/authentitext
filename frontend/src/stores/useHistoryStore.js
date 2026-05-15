@@ -10,6 +10,13 @@ export const useHistoryStore = defineStore("history", () => {
     );
   }
 
+  function getById(id) {
+    const all = JSON.parse(
+      localStorage.getItem("authentitext_history") || "[]",
+    );
+    return all.find((item) => item.id === id) || null;
+  }
+
   function remove(id) {
     history.value = history.value.filter((item) => item.id !== id);
     localStorage.setItem("authentitext_history", JSON.stringify(history.value));
@@ -20,5 +27,5 @@ export const useHistoryStore = defineStore("history", () => {
     localStorage.removeItem("authentitext_history");
   }
 
-  return { history, load, remove, clear };
+  return { history, load, getById, remove, clear };
 });

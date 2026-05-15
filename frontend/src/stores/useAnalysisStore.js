@@ -36,6 +36,10 @@ export const useAnalysisStore = defineStore("analysis", () => {
     }
   }
 
+  function loadFromHistory(item) {
+    result.value = item;
+  }
+
   function saveToHistory(data) {
     const history = JSON.parse(
       localStorage.getItem("authentitext_history") || "[]",
@@ -55,5 +59,5 @@ export const useAnalysisStore = defineStore("analysis", () => {
     result.value = null;
   }
 
-  return { result, loading, analyze, clearResult };
+  return { result, loading, analyze, loadFromHistory, clearResult };
 });

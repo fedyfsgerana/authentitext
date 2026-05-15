@@ -4,18 +4,19 @@ import { useRouter } from 'vue-router'
 import {
     Bot, User, ArrowLeft, Trash2, Clock,
     RotateCcw, History, Search, X,
-    TrendingUp, BarChart3, Filter
+    TrendingUp, BarChart3, Filter, Copy, ChevronRight
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { useHistoryStore } from '@/stores/useHistoryStore'
+import { useAnalysisStore } from '@/stores/useAnalysisStore'
 import { useToast } from '@/composables/useToast'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 
 const router = useRouter()
 const store = useHistoryStore()
+const analysisStore = useAnalysisStore()
 const { toast } = useToast()
 
 onMounted(() => store.load())
@@ -41,7 +42,6 @@ const filteredHistory = computed(() => {
     })
 })
 
-// Stats
 const avgAiScore = computed(() => {
     if (!store.history.length) return 0
     return Math.round(store.history.reduce((a, b) => a + b.ai_probability, 0) / store.history.length)
@@ -53,6 +53,20 @@ const humanCount = computed(() => store.history.filter(i => i.ai_probability < 5
 const showConfirmClear = ref(false)
 const showConfirmDelete = ref(false)
 const deleteTargetId = ref(null)
+
+function viewDetail(item) {
+    analysisStore.loadFromHistory(item)
+    router.push({ name: 'Result', params: { id: item.id } })
+}
+
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text)
+        toast({ title: 'Teks Disalin', description: 'Teks berhasil disalin ke clipboard', type: 'success' })
+    } catch (e) {
+        toast({ title: 'Gagal menyalin', type: 'error' })
+    }
+}
 
 function confirmDelete(id) {
     deleteTargetId.value = id
@@ -122,16 +136,19 @@ function clearSearch() {
 
             <!-- Tombol Kembali -->
             <button
-                class="group flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-200 mb-6"
+                class="group flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 px-3 py-2 rounded-xl hover:bg-muted/60 border border-transparent hover:border-border/50 -ml-3 mb-6"
                 @click="router.push('/')">
-                <ArrowLeft class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
-                Kembali ke Beranda
+                <div
+                    class="w-6 h-6 rounded-lg bg-muted group-hover:bg-background border border-border/50 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                    <ArrowLeft class="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+                </div>
+                <span>Kembali ke Beranda</span>
             </button>
 
-            <!-- Layout 2 kolom di desktop -->
+            <!-- Layout 2 kolom -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <!-- Kolom Kiri: Stats + Filter -->
+                <!-- Kolom Kanan: Stats + Filter -->
                 <div class="flex flex-col gap-4 lg:order-2">
 
                     <!-- Header mobile -->
@@ -141,7 +158,7 @@ function clearSearch() {
                         <Badge variant="secondary" class="font-bold">{{ store.history.length }}</Badge>
                     </div>
 
-                    <!-- Stats Cards -->
+                    <!-- Stats -->
                     <div v-if="!isEmpty" class="rounded-2xl border border-border bg-background p-5">
                         <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-4">Statistik
                         </p>
@@ -212,7 +229,7 @@ function clearSearch() {
 
                 </div>
 
-                <!-- Kolom Kanan: List (2/3) -->
+                <!-- Kolom Kiri: List -->
                 <div class="lg:col-span-2 lg:order-1 flex flex-col gap-4">
 
                     <!-- Header desktop -->
@@ -263,9 +280,7 @@ function clearSearch() {
                             <Search class="w-6 h-6 text-muted-foreground" />
                         </div>
                         <p class="text-sm font-semibold mb-1">Tidak ada hasil</p>
-                        <p class="text-xs text-muted-foreground mb-4">
-                            Tidak ditemukan riwayat untuk pencarian ini
-                        </p>
+                        <p class="text-xs text-muted-foreground mb-4">Tidak ditemukan riwayat untuk pencarian ini</p>
                         <button class="text-xs text-primary hover:underline font-medium" @click="clearSearch">
                             Hapus filter
                         </button>
@@ -274,25 +289,33 @@ function clearSearch() {
                     <!-- History List -->
                     <div v-else class="space-y-3">
                         <div v-for="item in filteredHistory" :key="item.id"
-                            class="group relative rounded-2xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden"
+                            class="group relative rounded-2xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden cursor-pointer"
                             :class="{
                                 'border-destructive/20 hover:border-destructive/40 bg-destructive/[0.02] hover:bg-destructive/[0.04]': getVerdict(item.ai_probability).isAi === true,
                                 'border-green-500/20 hover:border-green-500/40 bg-green-500/[0.02] hover:bg-green-500/[0.04]': getVerdict(item.ai_probability).isAi === false,
                                 'border-border hover:border-border/60': getVerdict(item.ai_probability).isAi === null,
-                            }">
+                            }" @click="viewDetail(item)">
+                            <!-- Top row -->
                             <div class="flex items-start justify-between gap-3 mb-3">
                                 <p
                                     class="text-sm text-muted-foreground line-clamp-2 flex-1 leading-relaxed group-hover:text-foreground/80 transition-colors duration-200">
                                     {{ item.text }}
                                 </p>
-                                <button
-                                    class="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0"
-                                    @click.stop="confirmDelete(item.id)">
-                                    <Trash2 class="w-3.5 h-3.5" />
-                                </button>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                        @click.stop="copyText(item.text)">
+                                        <Copy class="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                        @click.stop="confirmDelete(item.id)">
+                                        <Trash2 class="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- Score visual -->
+                            <!-- Score bar -->
                             <div class="flex items-center gap-2 mb-3">
                                 <div class="flex items-center gap-1.5 shrink-0">
                                     <Bot class="w-3.5 h-3.5 text-destructive" />
@@ -312,18 +335,24 @@ function clearSearch() {
                                 </div>
                             </div>
 
+                            <!-- Bottom row -->
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
                                     <Clock class="w-3 h-3" />
                                     {{ formatDate(item.savedAt) }}
                                 </div>
-                                <Badge :variant="getVerdict(item.ai_probability).variant" class="text-xs font-semibold">
-                                    {{ getVerdict(item.ai_probability).label }}
-                                </Badge>
+                                <div class="flex items-center gap-2">
+                                    <Badge :variant="getVerdict(item.ai_probability).variant"
+                                        class="text-xs font-semibold">
+                                        {{ getVerdict(item.ai_probability).label }}
+                                    </Badge>
+                                    <ChevronRight
+                                        class="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0" />
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Footer info -->
+                        <!-- Footer -->
                         <p class="text-center text-xs text-muted-foreground pt-2">
                             Menampilkan {{ filteredHistory.length }} dari {{ store.history.length }} analisis
                         </p>
