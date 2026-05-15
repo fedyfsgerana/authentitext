@@ -1,54 +1,41 @@
 ﻿# AuthentiText AI
 
-AuthentiText AI adalah aplikasi web modern untuk mendeteksi apakah sebuah teks ditulis oleh **AI** atau **Manusia** secara instan menggunakan **Groq API** dan model **LLaMA 3.3 70B**.
-
-Aplikasi ini memiliki tampilan modern, responsif, dark mode, serta mendukung export hasil analisis ke PDF dan JSON.
+AuthentiText AI adalah aplikasi web untuk mendeteksi apakah sebuah teks ditulis oleh AI atau manusia menggunakan Groq API dan model LLaMA 3.3 70B.
 
 ---
 
-# ✨ Fitur
+## Fitur
 
-- 🔍 Deteksi AI vs Human
-- 📊 Donut chart & progress bar
-- 🌙 Dark mode
-- 💾 Riwayat analisis (`localStorage`)
-- 📄 Export PDF & JSON
-- 📱 Responsive design
-- ⚡ Analisis cepat dengan Groq API
-
----
-
-# 🛠 Tech Stack
-
-| Bagian           | Teknologi                |
-| ---------------- | ------------------------ |
-| Framework        | Vue 3                    |
-| Build Tool       | Vite                     |
-| Styling          | Tailwind CSS v3          |
-| UI Components    | shadcn-vue               |
-| State Management | Pinia                    |
-| Routing          | Vue Router 4             |
-| AI Detection     | Groq API (LLaMA 3.3 70B) |
-| Export PDF       | jsPDF                    |
+- Deteksi AI vs Human
+- Donut chart & progress bar
+- Dark mode
+- Export PDF & JSON
+- Responsive design
+- Riwayat analisis menggunakan localStorage
+- Analisis cepat dengan Groq API
 
 ---
 
-# 📁 Struktur Project
+## Tech Stack
+
+- Vue 3
+- Vite
+- Tailwind CSS v3
+- shadcn-vue
+- Pinia
+- Vue Router 4
+- Groq API (LLaMA 3.3 70B)
+- jsPDF
+
+---
+
+## Struktur Project
 
 ```bash
 authentitext/
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── composables/
-│   │   ├── pages/
-│   │   ├── router/
-│   │   ├── stores/
-│   │   ├── App.vue
-│   │   └── main.js
-│   ├── .env
 │   ├── package.json
 │   ├── vite.config.js
 │   └── tailwind.config.cjs
@@ -58,27 +45,20 @@ authentitext/
 
 ---
 
-# 🚀 Instalasi
+## Instalasi
 
-## Clone Repository
+Clone repository:
 
 ```bash
 git clone <repo-url>
-cd authentitext
+cd authentitext/frontend
 ```
 
----
-
-## Install Dependencies
+Install dependencies:
 
 ```bash
-cd frontend
 npm install
 ```
-
----
-
-## Setup API Key
 
 Buat file `.env`:
 
@@ -86,19 +66,19 @@ Buat file `.env`:
 VITE_GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxx
 ```
 
-Ambil API key gratis di:
+Ambil API key di:
 
 https://console.groq.com/keys
 
 ---
 
-# ▶️ Menjalankan Project
+## Menjalankan Project
 
 ```bash
 npm run dev
 ```
 
-Buka:
+Buka di browser:
 
 ```txt
 http://localhost:5173
@@ -106,7 +86,7 @@ http://localhost:5173
 
 ---
 
-# 📄 Contoh Hasil
+## Contoh Hasil
 
 ```json
 {
@@ -118,27 +98,21 @@ http://localhost:5173
 
 ---
 
-# 🔒 Privasi
+## Privasi
 
-- Data history disimpan lokal di browser
+- Data disimpan lokal di browser
 - Tidak menggunakan database
 - Hanya teks analisis yang dikirim ke API
 
 ---
 
-# 👨‍💻 Developer
+## Developer
 
-<table>
-  <tr>
-    <td align="center">
-      <b>Fedy Fs.</b><br/>
-      <sub>Gerana Web Developer</sub>
-    </td>
-  </tr>
-</table>
+**Fedy Fs.**  
+Gerana Web Developer
 
 ---
 
-# 📜 Lisensi
+## Lisensi
 
 MIT License © 2026 AuthentiText AI
