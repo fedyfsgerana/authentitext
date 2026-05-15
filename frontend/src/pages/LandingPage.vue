@@ -3,7 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
     ArrowRight, Zap, Shield, Clock, Bot, User,
-    ChevronRight, Sparkles, TrendingUp, BarChart3, History
+    ChevronRight, Sparkles, TrendingUp, BarChart3,
+    History, CheckCircle2, Star
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -18,9 +19,9 @@ onMounted(() => {
 })
 
 const stats = [
-    { label: 'Teks Dianalisis', value: '10K+', icon: BarChart3 },
-    { label: 'Akurasi Model', value: '94%', icon: TrendingUp },
-    { label: 'Waktu Analisis', value: '<3s', icon: Zap },
+    { label: 'Teks Dianalisis', value: '10K+', icon: BarChart3, color: 'text-blue-500' },
+    { label: 'Akurasi Model', value: '94%', icon: TrendingUp, color: 'text-green-500' },
+    { label: 'Waktu Analisis', value: '<3s', icon: Zap, color: 'text-yellow-500' },
 ]
 
 const features = [
@@ -31,7 +32,8 @@ const features = [
         color: 'text-yellow-500',
         bg: 'bg-yellow-500/10',
         hoverBg: 'group-hover:bg-yellow-500/20',
-        border: 'group-hover:border-yellow-500/30',
+        border: 'group-hover:border-yellow-500/40',
+        shadow: 'group-hover:shadow-yellow-500/10',
     },
     {
         icon: Shield,
@@ -40,16 +42,18 @@ const features = [
         color: 'text-blue-500',
         bg: 'bg-blue-500/10',
         hoverBg: 'group-hover:bg-blue-500/20',
-        border: 'group-hover:border-blue-500/30',
+        border: 'group-hover:border-blue-500/40',
+        shadow: 'group-hover:shadow-blue-500/10',
     },
     {
         icon: Clock,
         title: 'Riwayat Analisis',
-        description: 'Semua hasil tersimpan otomatis. Akses kapan saja tanpa perlu login.',
+        description: 'Semua hasil tersimpan otomatis di browser. Akses kapan saja tanpa perlu login.',
         color: 'text-purple-500',
         bg: 'bg-purple-500/10',
         hoverBg: 'group-hover:bg-purple-500/20',
-        border: 'group-hover:border-purple-500/30',
+        border: 'group-hover:border-purple-500/40',
+        shadow: 'group-hover:shadow-purple-500/10',
     },
 ]
 
@@ -64,6 +68,13 @@ const examples = [
         ai: 4, human: 96, confidence: 'Tinggi', isAi: false,
         label: 'Pesan Kasual',
     },
+]
+
+const benefits = [
+    'Tidak perlu daftar akun',
+    'Hasil analisis instan',
+    'Riwayat tersimpan otomatis',
+    'Gratis selamanya',
 ]
 </script>
 
@@ -88,7 +99,7 @@ const examples = [
                         <History class="w-3.5 h-3.5" />
                         Riwayat
                     </Button>
-                    <Button size="sm" class="text-xs sm:text-sm gap-1.5 transition-all duration-200 hover:gap-2.5"
+                    <Button size="sm" class="text-xs sm:text-sm gap-1.5 transition-all duration-200"
                         @click="router.push('/analyze')">
                         <span class="hidden sm:inline">Mulai Analisis</span>
                         <span class="sm:hidden">Mulai</span>
@@ -99,222 +110,262 @@ const examples = [
         </nav>
 
         <!-- Hero -->
-        <section class="relative gradient-hero">
-            <!-- Background decoration -->
-            <div class="absolute inset-0 overflow-hidden pointer-events-none">
-                <div class="absolute top-20 left-1/4 w-64 h-64 bg-destructive/5 rounded-full blur-3xl" />
-                <div class="absolute top-32 right-1/4 w-48 h-48 bg-primary/5 rounded-full blur-3xl" />
-            </div>
+        <section class="relative overflow-hidden">
+            <!-- Background subtle dot pattern -->
+            <div class="absolute inset-0 pointer-events-none opacity-40 dark:opacity-20"
+                style="background-image: radial-gradient(circle, hsl(240 5.9% 10% / 0.15) 1px, transparent 1px); background-size: 24px 24px;" />
+            <!-- Gradient overlay -->
+            <div
+                class="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background pointer-events-none" />
+            <!-- Color blobs -->
+            <div
+                class="absolute top-16 left-1/4 w-72 h-72 bg-destructive/8 rounded-full blur-3xl pointer-events-none" />
+            <div class="absolute top-24 right-1/4 w-56 h-56 bg-green-500/8 rounded-full blur-3xl pointer-events-none" />
+            <div
+                class="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-28 pb-12 sm:pb-20 text-center transition-all duration-700"
-                :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
-                <Badge variant="secondary" class="mb-6 gap-1.5 text-xs px-3 py-1">
-                    <Sparkles class="w-3 h-3 text-yellow-500" />
-                    Deteksi Teks AI · Gratis Selamanya
-                </Badge>
+            <div class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-10 sm:pb-16 text-center transition-all duration-700"
+                :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
+                <!-- Top badge -->
+                <div class="flex items-center justify-center gap-2 mb-5">
+                    <Badge variant="secondary" class="gap-1.5 text-xs px-3 py-1 rounded-full">
+                        <Sparkles class="w-3 h-3 text-yellow-500" />
+                        Deteksi Teks AI · Gratis Selamanya
+                    </Badge>
+                </div>
 
-                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-5">
-                    Deteksi teks
-                    <span class="relative inline-block">
-                        <span class="text-destructive">AI</span>
-                        <svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 100 8" preserveAspectRatio="none">
-                            <path d="M0,5 Q25,0 50,5 Q75,10 100,5" stroke="currentColor" stroke-width="2" fill="none"
-                                class="text-destructive/40" />
-                        </svg>
+                <!-- Headline -->
+                <h1
+                    class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-4">
+                    <span class="block">Deteksi apakah teks</span>
+                    <span class="block mt-1">
+                        ditulis
+                        <span class="relative inline-block mx-1">
+                            <span class="text-green-500">Manusia</span>
+                            <svg class="absolute -bottom-1 left-0 w-full h-2" viewBox="0 0 100 8"
+                                preserveAspectRatio="none">
+                                <path d="M0,6 Q50,0 100,6" stroke="currentColor" stroke-width="2.5" fill="none"
+                                    class="text-green-500/40" stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        atau
+                        <span class="relative inline-block mx-1">
+                            <span class="text-destructive">AI?</span>
+                            <svg class="absolute -bottom-1 left-0 w-full h-2" viewBox="0 0 100 8"
+                                preserveAspectRatio="none">
+                                <path d="M0,6 Q50,0 100,6" stroke="currentColor" stroke-width="2.5" fill="none"
+                                    class="text-destructive/40" stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </span>
-                    <span class="text-muted-foreground"> vs </span>
-                    <span class="relative inline-block">
-                        <span class="text-green-500">Manusia</span>
-                        <svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 100 8" preserveAspectRatio="none">
-                            <path d="M0,5 Q25,0 50,5 Q75,10 100,5" stroke="currentColor" stroke-width="2" fill="none"
-                                class="text-green-500/40" />
-                        </svg>
-                    </span>
-                    <br class="hidden sm:block" />
-                    <span class="text-muted-foreground text-3xl sm:text-4xl md:text-5xl font-normal"> dalam detik</span>
                 </h1>
 
-                <p class="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-                    Tempel teks apapun dan langsung ketahui apakah ditulis oleh manusia atau dibuat AI.
-                    Tanpa login, tanpa biaya, hasil langsung tersedia.
+                <p class="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-7 leading-relaxed">
+                    Tempel teks apapun dan ketahui hasilnya dalam detik.
+                    Tanpa login, tanpa biaya.
                 </p>
 
-                <!-- CTA -->
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
                     <Button size="lg"
-                        class="w-full sm:w-auto gap-2 px-8 h-12 text-base font-semibold transition-all duration-200 hover:scale-105 hover:gap-3 active:scale-95 shadow-lg shadow-primary/20"
+                        class="w-full sm:w-auto gap-2 px-8 h-12 text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 rounded-xl"
                         @click="router.push('/analyze')">
                         <Sparkles class="w-4 h-4" />
                         Coba Sekarang — Gratis
                         <ArrowRight class="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="lg"
-                        class="w-full sm:w-auto h-12 text-base transition-all duration-200 hover:scale-105 active:scale-95 gap-2"
+                        class="w-full sm:w-auto h-12 text-base gap-2 transition-all duration-200 hover:scale-105 active:scale-95 rounded-xl"
                         @click="router.push('/history')">
                         <History class="w-4 h-4" />
                         Lihat Riwayat
                     </Button>
                 </div>
 
-                <!-- Stats -->
+                <!-- Benefits pills -->
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-10">
+                    <div v-for="b in benefits" :key="b"
+                        class="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 border border-border/50 px-3 py-1.5 rounded-full">
+                        <CheckCircle2 class="w-3 h-3 text-green-500 shrink-0" />
+                        {{ b }}
+                    </div>
+                </div>
+
+                <!-- Stats bar -->
                 <div
-                    class="inline-flex flex-wrap justify-center gap-4 sm:gap-8 px-6 py-4 rounded-2xl bg-muted/50 border border-border/50">
-                    <div v-for="stat in stats" :key="stat.label" class="flex items-center gap-2">
-                        <component :is="stat.icon" class="w-4 h-4 text-muted-foreground" />
-                        <span class="font-bold text-sm">{{ stat.value }}</span>
-                        <span class="text-xs text-muted-foreground hidden sm:inline">{{ stat.label }}</span>
+                    class="inline-flex flex-wrap justify-center gap-0 rounded-2xl border border-border/60 bg-background/80 backdrop-blur-sm overflow-hidden shadow-sm">
+                    <div v-for="(stat, i) in stats" :key="stat.label"
+                        class="flex items-center gap-3 px-6 py-3.5 transition-colors hover:bg-muted/40"
+                        :class="i < stats.length - 1 ? 'border-r border-border/60' : ''">
+                        <component :is="stat.icon" class="w-4 h-4 shrink-0" :class="stat.color" />
+                        <div class="text-left">
+                            <div class="font-bold text-sm leading-tight">{{ stat.value }}</div>
+                            <div class="text-[11px] text-muted-foreground leading-tight">{{ stat.label }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Divider -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        </div>
 
         <!-- Contoh Hasil -->
-        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-            <div class="text-center mb-8">
-                <p class="text-xs sm:text-sm text-muted-foreground uppercase tracking-widest font-semibold mb-2">
-                    Contoh Hasil Nyata
-                </p>
-                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Lihat Cara Kerjanya</h2>
+        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-7">
+                <div>
+                    <p class="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-1">
+                        Contoh Hasil Nyata
+                    </p>
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Lihat Cara Kerjanya</h2>
+                </div>
+                <Button variant="outline" size="sm" class="gap-1.5 shrink-0" @click="router.push('/analyze')">
+                    Coba Sendiri
+                    <ArrowRight class="w-3.5 h-3.5" />
+                </Button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div v-for="(example, i) in examples" :key="i"
-                    class="group relative rounded-2xl border p-5 sm:p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer overflow-hidden"
+                    class="group relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer overflow-hidden"
                     :class="example.isAi
-                        ? 'border-destructive/20 hover:border-destructive/50 hover:shadow-destructive/10'
-                        : 'border-green-500/20 hover:border-green-500/50 hover:shadow-green-500/10'"
+                        ? 'border-destructive/20 hover:border-destructive/40 bg-destructive/[0.02] hover:bg-destructive/[0.04]'
+                        : 'border-green-500/20 hover:border-green-500/40 bg-green-500/[0.02] hover:bg-green-500/[0.04]'"
                     @click="router.push('/analyze')">
-                    <!-- Background gradient -->
-                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                        :class="example.isAi ? 'gradient-ai' : 'gradient-human'" />
+                    <div class="flex items-center justify-between mb-3">
+                        <Badge variant="outline" class="text-xs gap-1 font-medium" :class="example.isAi
+                            ? 'border-destructive/30 text-destructive bg-destructive/5'
+                            : 'border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/5'">
+                            <component :is="example.isAi ? Bot : User" class="w-3 h-3" />
+                            {{ example.label }}
+                        </Badge>
+                        <Badge :variant="example.isAi ? 'destructive' : 'default'" class="text-xs font-semibold">
+                            {{ example.isAi ? 'Dibuat AI' : 'Ditulis Manusia' }}
+                        </Badge>
+                    </div>
 
-                    <div class="relative">
-                        <!-- Label -->
-                        <div class="flex items-center justify-between mb-4">
-                            <Badge variant="outline" class="text-xs gap-1"
-                                :class="example.isAi ? 'border-destructive/30 text-destructive' : 'border-green-500/30 text-green-600 dark:text-green-400'">
-                                <component :is="example.isAi ? Bot : User" class="w-3 h-3" />
-                                {{ example.label }}
-                            </Badge>
-                            <Badge :variant="example.isAi ? 'destructive' : 'default'" class="text-xs">
-                                {{ example.isAi ? 'Dibuat AI' : 'Ditulis Manusia' }}
-                            </Badge>
-                        </div>
+                    <p class="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2 italic">
+                        "{{ example.text }}"
+                    </p>
 
-                        <!-- Text preview -->
-                        <p
-                            class="text-sm text-muted-foreground leading-relaxed mb-5 line-clamp-2 italic group-hover:text-foreground/70 transition-colors duration-200">
-                            "{{ example.text }}"
-                        </p>
-
-                        <!-- Score bars -->
-                        <div class="space-y-3 mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-1.5 w-24 shrink-0">
-                                    <Bot class="w-3.5 h-3.5 text-destructive" />
-                                    <span class="text-xs font-semibold text-destructive">AI</span>
-                                </div>
-                                <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                    <div class="h-full bg-destructive rounded-full transition-all duration-1000"
-                                        :style="{ width: example.ai + '%' }" />
-                                </div>
-                                <span class="text-xs font-bold w-9 text-right tabular-nums">{{ example.ai }}%</span>
+                    <div class="space-y-2.5 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1.5 w-20 shrink-0">
+                                <Bot class="w-3.5 h-3.5 text-destructive" />
+                                <span class="text-xs font-semibold text-destructive">AI</span>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-1.5 w-24 shrink-0">
-                                    <User class="w-3.5 h-3.5 text-green-500" />
-                                    <span class="text-xs font-semibold text-green-500">Manusia</span>
-                                </div>
-                                <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                    <div class="h-full bg-green-500 rounded-full transition-all duration-1000"
-                                        :style="{ width: example.human + '%' }" />
-                                </div>
-                                <span class="text-xs font-bold w-9 text-right tabular-nums">{{ example.human }}%</span>
+                            <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                                <div class="h-full bg-destructive rounded-full transition-all duration-1000"
+                                    :style="{ width: example.ai + '%' }" />
                             </div>
+                            <span class="text-xs font-bold w-8 text-right tabular-nums">{{ example.ai }}%</span>
                         </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1.5 w-20 shrink-0">
+                                <User class="w-3.5 h-3.5 text-green-500" />
+                                <span class="text-xs font-semibold text-green-500">Manusia</span>
+                            </div>
+                            <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full transition-all duration-1000"
+                                    :style="{ width: example.human + '%' }" />
+                            </div>
+                            <span class="text-xs font-bold w-8 text-right tabular-nums">{{ example.human }}%</span>
+                        </div>
+                    </div>
 
-                        <!-- Footer -->
-                        <div class="flex items-center justify-between pt-3 border-t border-border/50">
-                            <span class="text-xs text-muted-foreground">Kepercayaan: <strong>{{ example.confidence
-                            }}</strong></span>
-                            <span
-                                class="text-xs text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-1">
-                                Coba sendiri
-                                <ChevronRight class="w-3 h-3" />
-                            </span>
-                        </div>
+                    <div class="flex items-center justify-between pt-3 border-t border-border/40">
+                        <span class="text-xs text-muted-foreground">
+                            Kepercayaan: <strong class="text-foreground">{{ example.confidence }}</strong>
+                        </span>
+                        <span
+                            class="text-xs text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-1">
+                            Analisis teks kamu
+                            <ChevronRight class="w-3 h-3" />
+                        </span>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Divider -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        </div>
 
         <!-- Fitur -->
-        <section class="border-y border-border/50 bg-muted/20">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-                <div class="text-center mb-10">
-                    <p class="text-xs sm:text-sm text-muted-foreground uppercase tracking-widest font-semibold mb-2">
+        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+            <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-7">
+                <div>
+                    <p class="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-1">
                         Fitur Unggulan
                     </p>
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Mengapa AuthentiText?</h2>
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Mengapa AuthentiText?</h2>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    <div v-for="feature in features" :key="feature.title"
-                        class="group relative p-6 rounded-2xl border border-border bg-background transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                        :class="feature.border">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all duration-300"
-                            :class="[feature.bg, feature.hoverBg]">
-                            <component :is="feature.icon" class="w-5 h-5" :class="feature.color" />
-                        </div>
-                        <h3 class="font-bold text-sm mb-2">{{ feature.title }}</h3>
-                        <p class="text-sm text-muted-foreground leading-relaxed">{{ feature.description }}</p>
-
-                        <!-- Hover arrow -->
-                        <div
-                            class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0">
-                            <ChevronRight class="w-4 h-4 text-muted-foreground" />
-                        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div v-for="feature in features" :key="feature.title"
+                    class="group relative p-5 rounded-2xl border border-border bg-background transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                    :class="[feature.border, feature.shadow]">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all duration-300"
+                        :class="[feature.bg, feature.hoverBg]">
+                        <component :is="feature.icon" class="w-5 h-5" :class="feature.color" />
+                    </div>
+                    <h3 class="font-bold text-sm mb-1.5">{{ feature.title }}</h3>
+                    <p class="text-sm text-muted-foreground leading-relaxed">{{ feature.description }}</p>
+                    <div
+                        class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <ChevronRight class="w-4 h-4 text-muted-foreground" />
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- CTA -->
-        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-            <div class="relative rounded-3xl border border-border bg-muted/30 overflow-hidden p-8 sm:p-12 text-center">
-                <!-- Decoration -->
-                <div
-                    class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                <div class="absolute inset-0 pointer-events-none">
-                    <div class="absolute top-8 left-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
-                    <div class="absolute bottom-8 right-8 w-32 h-32 bg-destructive/5 rounded-full blur-2xl" />
-                </div>
+        <!-- Divider -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        </div>
 
-                <div class="relative">
-                    <Badge variant="secondary" class="mb-4 gap-1.5">
-                        <Sparkles class="w-3 h-3" />
-                        Mulai Sekarang
-                    </Badge>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
-                        Siap mendeteksi teks AI?
-                    </h2>
-                    <p class="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto">
-                        Tanpa daftar. Tanpa kartu kredit. Hasil instan.
-                    </p>
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <Button size="lg"
-                            class="w-full sm:w-auto gap-2 px-10 h-12 text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20"
-                            @click="router.push('/analyze')">
-                            <Sparkles class="w-4 h-4" />
-                            Analisis Sekarang
-                            <ArrowRight class="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="lg"
-                            class="w-full sm:w-auto h-12 text-base gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
-                            @click="router.push('/history')">
-                            <History class="w-4 h-4" />
-                            Lihat Riwayat
-                        </Button>
+        <!-- CTA -->
+        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+            <div class="relative rounded-3xl border border-border overflow-hidden">
+                <!-- Background -->
+                <div class="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30"
+                    style="background-image: radial-gradient(circle, hsl(240 5.9% 10% / 0.1) 1px, transparent 1px); background-size: 20px 20px;" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-background via-muted/20 to-background pointer-events-none" />
+                <div
+                    class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
+                <div class="relative px-8 sm:px-12 py-10 sm:py-14">
+                    <div class="max-w-lg mx-auto text-center">
+                        <Badge variant="secondary" class="mb-4 gap-1.5 rounded-full">
+                            <Star class="w-3 h-3 text-yellow-500" />
+                            Mulai Sekarang
+                        </Badge>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-3">
+                            Siap mendeteksi teks AI?
+                        </h2>
+                        <p class="text-muted-foreground text-sm sm:text-base mb-7 leading-relaxed">
+                            Tanpa daftar. Tanpa kartu kredit. Hasil instan.
+                        </p>
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                            <Button size="lg"
+                                class="w-full sm:w-auto gap-2 px-8 h-12 text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 rounded-xl"
+                                @click="router.push('/analyze')">
+                                <Sparkles class="w-4 h-4" />
+                                Analisis Sekarang
+                                <ArrowRight class="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="lg"
+                                class="w-full sm:w-auto h-12 text-base gap-2 transition-all duration-200 hover:scale-105 active:scale-95 rounded-xl"
+                                @click="router.push('/history')">
+                                <History class="w-4 h-4" />
+                                Lihat Riwayat
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -323,13 +374,20 @@ const examples = [
         <!-- Footer -->
         <footer class="border-t border-border/50">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-5 h-5 rounded bg-primary flex items-center justify-center">
+                <div class="flex items-center gap-2 cursor-pointer group" @click="router.push('/')">
+                    <div
+                        class="w-5 h-5 rounded-md bg-primary flex items-center justify-center transition-transform group-hover:scale-110">
                         <Bot class="w-3 h-3 text-primary-foreground" />
                     </div>
                     <span class="text-xs text-muted-foreground font-medium">AuthentiText AI</span>
                 </div>
-                <span class="text-xs text-muted-foreground">© 2026 AuthentiText</span>
+                <div class="flex items-center gap-4">
+                    <button class="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        @click="router.push('/history')">
+                        Riwayat
+                    </button>
+                    <span class="text-xs text-muted-foreground">© 2026 AuthentiText</span>
+                </div>
             </div>
         </footer>
 
