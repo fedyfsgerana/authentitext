@@ -79,7 +79,9 @@ function formatDate(iso) {
                 </div>
                 <div class="flex items-center gap-1 sm:gap-2">
                     <DarkModeToggle />
-                    <Button variant="ghost" size="sm" class="text-xs sm:text-sm" @click="router.push('/history')">
+                    <Button variant="ghost" size="sm" class="text-xs sm:text-sm gap-1.5"
+                        @click="router.push('/history')">
+                        <History class="w-3.5 h-3.5" />
                         Riwayat
                     </Button>
                 </div>
@@ -162,7 +164,7 @@ function formatDate(iso) {
                                     <span class="text-sm font-semibold">Probabilitas AI</span>
                                 </div>
                                 <span class="text-3xl font-black tabular-nums text-destructive">{{ result.ai_probability
-                                    }}%</span>
+                                }}%</span>
                             </div>
                             <div class="h-3 bg-muted rounded-full overflow-hidden">
                                 <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-destructive/80 to-destructive"
@@ -286,7 +288,7 @@ function formatDate(iso) {
                     <div class="mt-3 flex flex-wrap gap-3 pt-3 border-t border-border/50">
                         <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <span class="font-medium text-foreground">{{ result.text.length.toLocaleString('id-ID')
-                                }}</span>
+                            }}</span>
                             karakter
                         </div>
                         <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
