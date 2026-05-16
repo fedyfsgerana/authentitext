@@ -14,6 +14,8 @@ import { useToast } from '@/composables/useToast'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import ScoreChart from '@/components/ScoreChart.vue'
 import TextHighlighter from '@/components/TextHighlighter.vue'
+import ConfettiEffect from '@/components/ConfettiEffect.vue'
+import SkeletonResult from '@/components/SkeletonResult.vue'
 
 const router = useRouter()
 const store = useAnalysisStore()
@@ -22,20 +24,56 @@ const { toast } = useToast()
 const result = computed(() => store.result)
 const showFullText = ref(false)
 const isVisible = ref(false)
+const showConfetti = ref(false)
+
+// Animasi progress bar
+const animatedAi = ref(0)
+const animatedHuman = ref(0)
+const animatedConfidence = ref(0)
+
+const isLoading = ref(true)
+
+function animateValue(refVal, target, duration = 1000) {
+    const start = performance.now()
+
+    function update(time) {
+        const elapsed = time - start
+        const progress = Math.min(elapsed / duration, 1)
+        const eased = 1 - Math.pow(1 - progress, 3)
+        refVal.value = Math.round(target * eased)
+        if (progress < 1) requestAnimationFrame(update)
+    }
+
+    requestAnimationFrame(update)
+}
 
 onMounted(() => {
     if (!result.value) { router.push('/analyze'); return }
-    setTimeout(() => isVisible.value = true, 100)
+
+    // Simulasi loading sebentar supaya skeleton keliatan
+    setTimeout(() => {
+        isLoading.value = false
+        isVisible.value = true
+        animateValue(animatedAi, result.value.ai_probability, 1200)
+        animateValue(animatedHuman, result.value.human_probability, 1200)
+        animateValue(animatedConfidence, 100, 1400)
+
+        if (result.value.human_probability > result.value.ai_probability) {
+            setTimeout(() => {
+                showConfetti.value = true
+            }, 600)
+        }
+    }, 800)
 })
 
 const verdictConfig = computed(() => {
     if (!result.value) return {}
     const ai = result.value.ai_probability
-    if (ai >= 80) return { label: 'Dibuat AI', variant: 'destructive', icon: Bot, color: 'text-destructive', bg: 'bg-destructive/10', border: 'border-destructive/30', glow: 'shadow-destructive/20' }
-    if (ai >= 60) return { label: 'Kemungkinan AI', variant: 'destructive', icon: Bot, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', glow: 'shadow-orange-500/20' }
-    if (ai >= 40) return { label: 'Tidak Pasti', variant: 'secondary', icon: Minus, color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border', glow: '' }
-    if (ai >= 20) return { label: 'Kemungkinan Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30', glow: 'shadow-green-500/20' }
-    return { label: 'Ditulis Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30', glow: 'shadow-green-500/20' }
+    if (ai >= 80) return { label: 'Dibuat AI', variant: 'destructive', icon: Bot, color: 'text-destructive', bg: 'bg-destructive/10', border: 'border-destructive/30' }
+    if (ai >= 60) return { label: 'Kemungkinan AI', variant: 'destructive', icon: Bot, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30' }
+    if (ai >= 40) return { label: 'Tidak Pasti', variant: 'secondary', icon: Minus, color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border' }
+    if (ai >= 20) return { label: 'Kemungkinan Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30' }
+    return { label: 'Ditulis Manusia', variant: 'default', icon: User, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30' }
 })
 
 const confidenceIcon = computed(() => {
@@ -67,6 +105,9 @@ function formatDate(iso) {
 <template>
     <div class="min-h-screen bg-background">
 
+        <!-- Konfeti -->
+        <ConfettiEffect :active="showConfetti" />
+
         <!-- Navbar -->
         <nav class="border-b border-border/50 sticky top-0 z-50 glass">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
@@ -88,10 +129,9 @@ function formatDate(iso) {
             </div>
         </nav>
 
-        <main v-if="result" class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 transition-all duration-500"
-            :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+        <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
-            <!-- Tombol Kembali -->
+            <!-- Tombol Kembali selalu tampil -->
             <div class="flex items-center justify-between mb-8">
                 <button
                     class="group flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 px-3 py-2 rounded-xl hover:bg-muted/60 border border-transparent hover:border-border/50 -ml-3"
@@ -103,230 +143,280 @@ function formatDate(iso) {
                     <span>Analisis Baru</span>
                 </button>
 
-                <div
+                <div v-if="!isLoading && result"
                     class="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 border border-border/50 px-3 py-1.5 rounded-full">
                     <Clock class="w-3 h-3" />
                     {{ formatDate(result.analyzedAt) }}
                 </div>
+                <div v-else class="h-7 w-40 bg-muted rounded-full shimmer animate-pulse" />
             </div>
 
-            <!-- Verdict Hero Card -->
-            <div class="relative rounded-3xl border p-6 sm:p-8 mb-6 overflow-hidden transition-all duration-300 hover:shadow-xl"
-                :class="[verdictConfig.border]">
-                <div class="absolute inset-0 opacity-30 pointer-events-none"
-                    :class="result.ai_probability >= 50 ? 'gradient-ai' : 'gradient-human'" />
-                <div class="relative flex flex-col sm:flex-row items-center gap-6">
-                    <div class="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 border transition-transform duration-300 hover:scale-105 shadow-lg"
-                        :class="[verdictConfig.bg, verdictConfig.border]">
-                        <component :is="verdictConfig.icon" class="w-10 h-10" :class="verdictConfig.color" />
+            <!-- Skeleton Loading -->
+            <SkeletonResult v-if="isLoading" />
+
+            <!-- Konten Asli -->
+            <div v-else-if="result" class="transition-all duration-500"
+                :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+
+                <!-- Verdict Hero Card -->
+                <div class="relative rounded-3xl border p-6 sm:p-8 mb-6 overflow-hidden transition-all duration-300 hover:shadow-xl"
+                    :class="verdictConfig.border">
+                    <div class="absolute inset-0 opacity-30 pointer-events-none"
+                        :class="result.ai_probability >= 50 ? 'gradient-ai' : 'gradient-human'" />
+
+                    <div v-if="result.human_probability > result.ai_probability"
+                        class="absolute top-3 right-3 flex items-center gap-1.5 bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        ✨ Teks Asli Manusia
                     </div>
-                    <div class="text-center sm:text-left flex-1">
-                        <Badge :variant="verdictConfig.variant" class="mb-2 text-xs px-3">
-                            {{ verdictConfig.label }}
-                        </Badge>
-                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1">Analisis Selesai</h1>
-                        <div
-                            class="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-muted-foreground">
-                            <Clock class="w-3 h-3" />
-                            {{ formatDate(result.analyzedAt) }}
+
+                    <div class="relative flex flex-col sm:flex-row items-center gap-6">
+                        <div class="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 border shadow-lg"
+                            :class="[verdictConfig.bg, verdictConfig.border]" :style="{
+                                transform: isVisible ? 'scale(1)' : 'scale(0.5)',
+                                opacity: isVisible ? 1 : 0,
+                                transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                            }">
+                            <component :is="verdictConfig.icon" class="w-10 h-10" :class="verdictConfig.color" />
                         </div>
-                    </div>
-                    <div class="flex sm:flex-col gap-3 sm:gap-2 shrink-0">
-                        <div class="text-center px-4 py-2 rounded-xl bg-background/60 border border-border/50">
-                            <div class="text-2xl font-black tabular-nums text-destructive">{{ result.ai_probability }}%
+                        <div class="text-center sm:text-left flex-1">
+                            <Badge :variant="verdictConfig.variant" class="mb-2 text-xs px-3">
+                                {{ verdictConfig.label }}
+                            </Badge>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1">Analisis Selesai</h1>
+                            <div
+                                class="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-muted-foreground">
+                                <Clock class="w-3 h-3" />
+                                {{ formatDate(result.analyzedAt) }}
                             </div>
-                            <div class="text-xs text-muted-foreground">AI</div>
                         </div>
-                        <div class="text-center px-4 py-2 rounded-xl bg-background/60 border border-border/50">
-                            <div class="text-2xl font-black tabular-nums text-green-500">{{ result.human_probability }}%
+                        <div class="flex sm:flex-col gap-3 sm:gap-2 shrink-0">
+                            <div class="text-center px-4 py-2 rounded-xl bg-background/60 border border-border/50"
+                                :style="{
+                                    transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                                    opacity: isVisible ? 1 : 0,
+                                    transition: 'all 0.4s ease',
+                                    transitionDelay: '200ms'
+                                }">
+                                <div class="text-2xl font-black tabular-nums text-destructive">{{ animatedAi }}%</div>
+                                <div class="text-xs text-muted-foreground">AI</div>
                             </div>
-                            <div class="text-xs text-muted-foreground">Manusia</div>
+                            <div class="text-center px-4 py-2 rounded-xl bg-background/60 border border-border/50"
+                                :style="{
+                                    transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                                    opacity: isVisible ? 1 : 0,
+                                    transition: 'all 0.4s ease',
+                                    transitionDelay: '300ms'
+                                }">
+                                <div class="text-2xl font-black tabular-nums text-green-500">{{ animatedHuman }}%</div>
+                                <div class="text-xs text-muted-foreground">Manusia</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Chart + Detail -->
-            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-5">
-                <Card class="sm:col-span-2 border-border card-interactive">
-                    <CardContent class="p-6 flex items-center justify-center">
-                        <ScoreChart :ai-score="result.ai_probability" :human-score="result.human_probability" />
+                <!-- Chart + Detail -->
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-5">
+                    <Card class="sm:col-span-2 border-border card-interactive">
+                        <CardContent class="p-6 flex items-center justify-center">
+                            <ScoreChart :ai-score="animatedAi" :human-score="animatedHuman" />
+                        </CardContent>
+                    </Card>
+                    <div class="sm:col-span-3 flex flex-col gap-3">
+                        <Card class="border-border card-interactive-ai flex-1">
+                            <CardContent class="p-4 sm:p-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-lg bg-destructive/10 flex items-center justify-center">
+                                            <Bot class="w-3.5 h-3.5 text-destructive" />
+                                        </div>
+                                        <span class="text-sm font-semibold">Probabilitas AI</span>
+                                    </div>
+                                    <span class="text-3xl font-black tabular-nums text-destructive">{{ animatedAi
+                                        }}%</span>
+                                </div>
+                                <div class="h-3 bg-muted rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-destructive/80 to-destructive"
+                                        :style="{ width: animatedAi + '%', transition: 'width 1.2s cubic-bezier(0.34, 1.1, 0.64, 1)' }" />
+                                </div>
+                                <div class="flex justify-between mt-1.5 px-0.5">
+                                    <span class="text-[10px] text-muted-foreground">0%</span>
+                                    <span class="text-[10px] text-muted-foreground">50%</span>
+                                    <span class="text-[10px] text-muted-foreground">100%</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card class="border-border card-interactive-human flex-1">
+                            <CardContent class="p-4 sm:p-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                            <User class="w-3.5 h-3.5 text-green-500" />
+                                        </div>
+                                        <span class="text-sm font-semibold">Probabilitas Manusia</span>
+                                    </div>
+                                    <span class="text-3xl font-black tabular-nums text-green-500">{{ animatedHuman
+                                        }}%</span>
+                                </div>
+                                <div class="h-3 bg-muted rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-green-500/80 to-green-500"
+                                        :style="{ width: animatedHuman + '%', transition: 'width 1.2s cubic-bezier(0.34, 1.1, 0.64, 1)' }" />
+                                </div>
+                                <div class="flex justify-between mt-1.5 px-0.5">
+                                    <span class="text-[10px] text-muted-foreground">0%</span>
+                                    <span class="text-[10px] text-muted-foreground">50%</span>
+                                    <span class="text-[10px] text-muted-foreground">100%</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card class="border-border card-interactive">
+                            <CardContent class="p-4 sm:p-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <component :is="confidenceIcon" class="w-3.5 h-3.5 text-primary" />
+                                        </div>
+                                        <span class="text-sm font-semibold">Tingkat Kepercayaan</span>
+                                    </div>
+                                    <Badge variant="outline" class="font-semibold">{{ result.confidence }}</Badge>
+                                </div>
+                                <div class="h-2 bg-muted rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary" :style="{
+                                        width: result.confidence === 'Tinggi' ? animatedConfidence + '%'
+                                            : result.confidence === 'Sedang' ? (animatedConfidence * 0.6) + '%'
+                                                : (animatedConfidence * 0.3) + '%',
+                                        transition: 'width 1.4s cubic-bezier(0.34, 1.1, 0.64, 1)'
+                                    }" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+
+                <!-- Ringkasan -->
+                <Card class="mb-4 border-border card-interactive-primary">
+                    <CardHeader class="pb-2 px-5 pt-5">
+                        <CardTitle class="text-sm font-bold flex items-center gap-2">
+                            <div class="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
+                                <FileJson class="w-3 h-3 text-primary" />
+                            </div>
+                            Ringkasan Analisis
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent class="px-5 pb-5">
+                        <p class="text-sm text-muted-foreground leading-relaxed">{{ result.summary }}</p>
                     </CardContent>
                 </Card>
-                <div class="sm:col-span-3 flex flex-col gap-3">
-                    <Card class="border-border card-interactive-ai flex-1">
-                        <CardContent class="p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-lg bg-destructive/10 flex items-center justify-center">
-                                        <Bot class="w-3.5 h-3.5 text-destructive" />
-                                    </div>
-                                    <span class="text-sm font-semibold">Probabilitas AI</span>
-                                </div>
-                                <span class="text-3xl font-black tabular-nums text-destructive">{{ result.ai_probability
-                                }}%</span>
-                            </div>
-                            <div class="h-3 bg-muted rounded-full overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-destructive/80 to-destructive"
-                                    :style="{ width: result.ai_probability + '%' }" />
-                            </div>
-                        </CardContent>
-                    </Card>
 
-                    <Card class="border-border card-interactive-human flex-1">
-                        <CardContent class="p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
-                                        <User class="w-3.5 h-3.5 text-green-500" />
-                                    </div>
-                                    <span class="text-sm font-semibold">Probabilitas Manusia</span>
-                                </div>
-                                <span class="text-3xl font-black tabular-nums text-green-500">{{
-                                    result.human_probability }}%</span>
-                            </div>
-                            <div class="h-3 bg-muted rounded-full overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-green-500/80 to-green-500"
-                                    :style="{ width: result.human_probability + '%' }" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card class="border-border card-interactive">
-                        <CardContent class="p-4 sm:p-5">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                                        <component :is="confidenceIcon" class="w-3.5 h-3.5 text-primary" />
-                                    </div>
-                                    <span class="text-sm font-semibold">Tingkat Kepercayaan</span>
-                                </div>
-                                <Badge variant="outline" class="font-semibold">{{ result.confidence }}</Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-
-            <!-- Ringkasan -->
-            <Card class="mb-4 border-border card-interactive-primary">
-                <CardHeader class="pb-2 px-5 pt-5">
-                    <CardTitle class="text-sm font-bold flex items-center gap-2">
-                        <div class="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
-                            <FileJson class="w-3 h-3 text-primary" />
-                        </div>
-                        Ringkasan Analisis
-                    </CardTitle>
-                </CardHeader>
-                <CardContent class="px-5 pb-5">
-                    <p class="text-sm text-muted-foreground leading-relaxed">{{ result.summary }}</p>
-                </CardContent>
-            </Card>
-
-            <!-- Indikator -->
-            <Card v-if="result.highlights?.length" class="mb-4 border-border">
-                <CardHeader class="pb-2 px-5 pt-5">
-                    <CardTitle class="text-sm font-bold flex items-center gap-2">
-                        <div class="w-5 h-5 rounded bg-yellow-500/10 flex items-center justify-center">
-                            <AlertCircle class="w-3 h-3 text-yellow-500" />
-                        </div>
-                        Indikator Utama
-                    </CardTitle>
-                </CardHeader>
-                <CardContent class="px-5 pb-5 space-y-2.5">
-                    <div v-for="(h, i) in result.highlights" :key="i"
-                        class="p-3.5 rounded-xl bg-muted/40 border border-border/50 transition-all duration-200 hover:bg-muted/70 hover:border-border hover:shadow-sm">
-                        <p class="text-xs font-semibold mb-1.5 italic text-foreground/80">"{{ h.text }}"</p>
-                        <p class="text-xs text-muted-foreground leading-relaxed">{{ h.reason }}</p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Teks yang Dianalisis dengan Highlight -->
-            <Card class="mb-6 border-border card-interactive">
-                <CardHeader class="px-5 pt-5 pb-3">
-                    <div class="flex items-start justify-between gap-3">
+                <!-- Indikator -->
+                <Card v-if="result.highlights?.length" class="mb-4 border-border">
+                    <CardHeader class="pb-2 px-5 pt-5">
                         <CardTitle class="text-sm font-bold flex items-center gap-2">
-                            <div class="w-5 h-5 rounded bg-muted flex items-center justify-center shrink-0">
-                                <FileText class="w-3 h-3 text-muted-foreground" />
+                            <div class="w-5 h-5 rounded bg-yellow-500/10 flex items-center justify-center">
+                                <AlertCircle class="w-3 h-3 text-yellow-500" />
                             </div>
-                            Teks yang Dianalisis
+                            Indikator Utama
                         </CardTitle>
-                        <div class="flex items-center gap-3 shrink-0">
-                            <div class="flex items-center gap-1.5">
-                                <span
-                                    class="inline-block w-3 h-3 rounded-sm bg-destructive/20 border-b-2 border-destructive/50" />
-                                <span class="text-xs text-muted-foreground">Terindikasi AI</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="inline-block w-3 h-3 rounded-sm bg-transparent border border-border" />
-                                <span class="text-xs text-muted-foreground">Normal</span>
-                            </div>
+                    </CardHeader>
+                    <CardContent class="px-5 pb-5 space-y-2.5">
+                        <div v-for="(h, i) in result.highlights" :key="i"
+                            class="p-3.5 rounded-xl bg-muted/40 border border-border/50 transition-all duration-200 hover:bg-muted/70 hover:border-border hover:shadow-sm">
+                            <p class="text-xs font-semibold mb-1.5 italic text-foreground/80">"{{ h.text }}"</p>
+                            <p class="text-xs text-muted-foreground leading-relaxed">{{ h.reason }}</p>
                         </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/50">
-                        <AlertCircle class="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                        <p class="text-xs text-muted-foreground">
-                            Teks dengan <span class="text-destructive font-medium">warna merah</span> terindikasi
-                            ditulis oleh AI berdasarkan pola bahasa yang terdeteksi.
-                        </p>
-                    </div>
-                </CardHeader>
-                <CardContent class="px-5 pb-5">
-                    <div class="relative rounded-xl border border-border/50 bg-muted/20 p-4 overflow-hidden transition-all duration-300"
-                        :class="showFullText ? '' : 'max-h-48'">
-                        <TextHighlighter :text="result.text" :highlights="result.highlights" />
-                        <div v-if="!showFullText && result.text.length > 300"
-                            class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/80 to-transparent pointer-events-none" />
-                    </div>
-                    <button v-if="result.text.length > 300"
-                        class="mt-3 w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all duration-200 py-2 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/50"
-                        @click="showFullText = !showFullText">
-                        <component :is="showFullText ? ChevronUp : ChevronDown" class="w-3.5 h-3.5" />
-                        {{ showFullText ? 'Tampilkan lebih sedikit' : 'Tampilkan teks lengkap' }}
-                    </button>
-                    <div class="mt-3 flex flex-wrap gap-3 pt-3 border-t border-border/50">
-                        <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <span class="font-medium text-foreground">{{ result.text.length.toLocaleString('id-ID')
-                            }}</span>
-                            karakter
-                        </div>
-                        <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <span class="font-medium text-foreground">{{
-                                result.text.split(/\s+/).filter(Boolean).length.toLocaleString('id-ID') }}</span>
-                            kata
-                        </div>
-                        <div v-if="result.highlights?.length"
-                            class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <span class="font-medium text-destructive">{{ result.highlights.length }}</span>
-                            frasa terindikasi AI
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
 
-            <!-- Aksi -->
-            <div class="flex flex-col sm:flex-row gap-3">
-                <Button
-                    class="flex-1 gap-2 h-11 font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-primary/10 rounded-xl"
-                    @click="router.push('/analyze')">
-                    <RotateCcw class="w-4 h-4" />
-                    Analisis Lagi
-                </Button>
-                <Button variant="outline"
-                    class="flex-1 gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] rounded-xl"
-                    @click="handleShare">
-                    <Share2 class="w-4 h-4" />
-                    Salin Hasil
-                </Button>
-                <Button variant="outline"
-                    class="flex-1 gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] rounded-xl"
-                    @click="router.push('/history')">
-                    <History class="w-4 h-4" />
-                    Riwayat
-                </Button>
+                <!-- Teks yang Dianalisis -->
+                <Card class="mb-6 border-border card-interactive">
+                    <CardHeader class="px-5 pt-5 pb-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <CardTitle class="text-sm font-bold flex items-center gap-2">
+                                <div class="w-5 h-5 rounded bg-muted flex items-center justify-center shrink-0">
+                                    <FileText class="w-3 h-3 text-muted-foreground" />
+                                </div>
+                                Teks yang Dianalisis
+                            </CardTitle>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span
+                                        class="inline-block w-3 h-3 rounded-sm bg-destructive/20 border-b-2 border-destructive/50" />
+                                    <span class="text-xs text-muted-foreground">Terindikasi AI</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="inline-block w-3 h-3 rounded-sm bg-transparent border border-border" />
+                                    <span class="text-xs text-muted-foreground">Normal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/50">
+                            <AlertCircle class="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            <p class="text-xs text-muted-foreground">
+                                Teks dengan <span class="text-destructive font-medium">warna merah</span> terindikasi
+                                ditulis oleh AI berdasarkan pola bahasa yang terdeteksi.
+                            </p>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="px-5 pb-5">
+                        <div class="relative rounded-xl border border-border/50 bg-muted/20 p-4 overflow-hidden transition-all duration-300"
+                            :class="showFullText ? '' : 'max-h-48'">
+                            <TextHighlighter :text="result.text" :highlights="result.highlights" />
+                            <div v-if="!showFullText && result.text.length > 300"
+                                class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/80 to-transparent pointer-events-none" />
+                        </div>
+                        <button v-if="result.text.length > 300"
+                            class="mt-3 w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all duration-200 py-2 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/50"
+                            @click="showFullText = !showFullText">
+                            <component :is="showFullText ? ChevronUp : ChevronDown" class="w-3.5 h-3.5" />
+                            {{ showFullText ? 'Tampilkan lebih sedikit' : 'Tampilkan teks lengkap' }}
+                        </button>
+                        <div class="mt-3 flex flex-wrap gap-3 pt-3 border-t border-border/50">
+                            <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span class="font-medium text-foreground">{{ result.text.length.toLocaleString('id-ID')
+                                    }}</span>
+                                karakter
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span class="font-medium text-foreground">{{
+                                    result.text.split(/\s+/).filter(Boolean).length.toLocaleString('id-ID') }}</span>
+                                kata
+                            </div>
+                            <div v-if="result.highlights?.length"
+                                class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span class="font-medium text-destructive">{{ result.highlights.length }}</span>
+                                frasa terindikasi AI
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Aksi -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <Button
+                        class="flex-1 gap-2 h-11 font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-primary/10 rounded-xl"
+                        @click="router.push('/analyze')">
+                        <RotateCcw class="w-4 h-4" />
+                        Analisis Lagi
+                    </Button>
+                    <Button variant="outline"
+                        class="flex-1 gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] rounded-xl"
+                        @click="handleShare">
+                        <Share2 class="w-4 h-4" />
+                        Salin Hasil
+                    </Button>
+                    <Button variant="outline"
+                        class="flex-1 gap-2 h-11 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] rounded-xl"
+                        @click="router.push('/history')">
+                        <History class="w-4 h-4" />
+                        Riwayat
+                    </Button>
+                </div>
+
             </div>
-
         </main>
     </div>
 </template>
