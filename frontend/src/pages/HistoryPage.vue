@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 import {
     Bot, User, ArrowLeft, Trash2, Clock,
     RotateCcw, History, Search, X,
-    TrendingUp, BarChart3, Filter, Copy, ChevronRight
+    TrendingUp, BarChart3, Filter, Copy, ChevronRight,
+    LineChart
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +14,7 @@ import { useAnalysisStore } from '@/stores/useAnalysisStore'
 import { useToast } from '@/composables/useToast'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
+import HistoryChart from '@/components/HistoryChart.vue'
 
 const router = useRouter()
 const store = useHistoryStore()
@@ -23,6 +25,7 @@ onMounted(() => store.load())
 
 const searchQuery = ref('')
 const filterVerdict = ref('semua')
+const showChart = ref(true)
 
 const filters = [
     { value: 'semua', label: 'Semua' },
@@ -145,7 +148,6 @@ function clearSearch() {
                 <span>Kembali ke Beranda</span>
             </button>
 
-            <!-- Layout 2 kolom -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <!-- Kolom Kanan: Stats + Filter -->
@@ -219,7 +221,7 @@ function clearSearch() {
                         </div>
                     </div>
 
-                    <!-- CTA Analisis Baru -->
+                    <!-- CTA -->
                     <Button
                         class="w-full gap-2 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
                         @click="router.push('/analyze')">
@@ -237,6 +239,29 @@ function clearSearch() {
                         <History class="w-5 h-5 text-muted-foreground" />
                         <h1 class="text-2xl font-extrabold tracking-tight">Riwayat</h1>
                         <Badge variant="secondary" class="font-bold">{{ store.history.length }}</Badge>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div v-if="!isEmpty && store.history.length >= 2"
+                        class="rounded-2xl border border-border bg-background p-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <LineChart class="w-3.5 h-3.5 text-primary" />
+                                </div>
+                                <p class="text-sm font-bold">Tren Analisis</p>
+                            </div>
+                            <button
+                                class="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted"
+                                @click="showChart = !showChart">
+                                {{ showChart ? 'Sembunyikan' : 'Tampilkan' }}
+                            </button>
+                        </div>
+
+                        <div class="overflow-hidden transition-all duration-300"
+                            :class="showChart ? 'max-h-72 opacity-100' : 'max-h-0 opacity-0'">
+                            <HistoryChart :history="store.history" />
+                        </div>
                     </div>
 
                     <!-- Search -->
@@ -295,7 +320,6 @@ function clearSearch() {
                                 'border-green-500/20 hover:border-green-500/40 bg-green-500/[0.02] hover:bg-green-500/[0.04]': getVerdict(item.ai_probability).isAi === false,
                                 'border-border hover:border-border/60': getVerdict(item.ai_probability).isAi === null,
                             }" @click="viewDetail(item)">
-                            <!-- Top row -->
                             <div class="flex items-start justify-between gap-3 mb-3">
                                 <p
                                     class="text-sm text-muted-foreground line-clamp-2 flex-1 leading-relaxed group-hover:text-foreground/80 transition-colors duration-200">
@@ -315,7 +339,6 @@ function clearSearch() {
                                 </div>
                             </div>
 
-                            <!-- Score bar -->
                             <div class="flex items-center gap-2 mb-3">
                                 <div class="flex items-center gap-1.5 shrink-0">
                                     <Bot class="w-3.5 h-3.5 text-destructive" />
@@ -335,7 +358,6 @@ function clearSearch() {
                                 </div>
                             </div>
 
-                            <!-- Bottom row -->
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
                                     <Clock class="w-3 h-3" />
@@ -352,7 +374,6 @@ function clearSearch() {
                             </div>
                         </div>
 
-                        <!-- Footer -->
                         <p class="text-center text-xs text-muted-foreground pt-2">
                             Menampilkan {{ filteredHistory.length }} dari {{ store.history.length }} analisis
                         </p>
@@ -360,7 +381,6 @@ function clearSearch() {
 
                 </div>
             </div>
-
         </main>
 
         <ConfirmDialog :open="showConfirmDelete" title="Hapus analisis ini?"
